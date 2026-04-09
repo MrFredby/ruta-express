@@ -1,57 +1,167 @@
 import { useState } from 'react';
 
-function TrackingForm() {
-  const [trackingCode, setTrackingCode] = useState('');
-  const [result, setResult] = useState('');
+function QuoteForm() {
+  const [formData, setFormData] = useState({
+    nombre: '',
+    telefono: '',
+    correo: '',
+    origen: '',
+    destino: '',
+    peso: '',
+    tipo_paquete: '',
+    mensaje: ''
+  });
 
-  function handleTrack(e: React.FormEvent) {
+  const [resultado, setResultado] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!trackingCode.trim()) {
-      setResult('Ingresa un número de guía válido.');
-      return;
-    }
+    try {
+      setLoading(true);
+      setResultado('');
 
-    const code = trackingCode.trim().toUpperCase();
+      const response = await fetch('http://localhost:3000/api/cotizaciones', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...formData,
+          peso: Number(formData.peso)
+        })
+      });
 
-    if (code === 'RX1001') {
-      setResult('Guía RX1001: En tránsito.');
-    } else if (code === 'RX1002') {
-      setResult('Guía RX1002: Entregado.');
-    } else if (code === 'RX1003') {
-      setResult('Guía RX1003: En reparto.');
-    } else {
-      setResult('No se encontró información para esa guía.');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al guardar cotización');
+      }
+
+      setResultado('Cotización enviada correctamente.');
+      setFormData({
+        nombre: '',
+        telefono: '',
+        correo: '',
+        origen: '',
+        destino: '',
+        peso: '',
+        tipo_paquete: '',
+        mensaje: ''
+      });
+    } catch (error) {
+      console.error(error);
+      setResultado('No se pudo guardar la cotización.');
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <section id="rastreo" className="section">
+    <section id="cotizacion" className="section">
       <div className="container">
         <div className="section-heading-block">
-          <span className="section-tag">Rastreo</span>
-          <h2>Consulta el estado de tu envío</h2>
+          <span className="section-tag">Cotización</span>
+          <h2>Solicita una cotización</h2>
           <p>
-            Ingresa tu número de guía para ver el avance de tu paquete.
+            Completa tus datos para estimar tu envío y registrar tu solicitud.
           </p>
         </div>
 
         <div className="feature-box">
-          <form className="feature-form" onSubmit={handleTrack}>
+          <form className="feature-form" onSubmit={handleSubmit}>
             <input
               type="text"
-              placeholder="Ejemplo: RX1001"
-              value={trackingCode}
-              onChange={(e) => setTrackingCode(e.target.value)}
+              name="nombre"
+              placeholder="Nombre"
+              value={formData.nombre}
+              onChange={handleChange}
+              required
             />
-            <button type="submit" className="btn btn-primary">Rastrear</button>
+
+            <input
+              type="text"
+              name="telefono"
+              placeholder="Teléfono"
+              value={formData.telefono}
+              onChange={handleChange}
+            />
+
+            <input
+              type="email"
+              name="correo"
+              placeholder="Correo"
+              value={formData.correo}
+              onChange={handleChange}
+            />
+
+            <input
+              type="text"
+              name="origen"
+              placeholder="Origen"
+              value={formData.origen}
+              onChange={handleChange}
+              required
+            />
+
+            <input
+              type="text"
+              name="destino"
+              placeholder="Destino"
+              value={formData.destino}
+              onChange={handleChange}
+              required
+            />
+
+            <input
+              type="number"
+              step="0.01"
+              name="peso"
+              placeholder="Peso en kg"
+              value={formData.peso}
+              onChange={handleChange}
+              required
+            />
+
+            <select
+              name="tipo_paquete"
+              value={formData.tipo_paquete}
+              onChange={handleChange}
+            >
+              <option value="">Selecciona tipo de paquete</option>
+              <option value="Documentos">Documentos</option>
+              <option value="Caja pequeña">Caja pequeña</option>
+              <option value="Caja mediana">Caja mediana</option>
+              <option value="Caja grande">Caja grande</option>
+            </select>
+
+            <textarea
+              name="mensaje"
+              placeholder="Detalles adicionales"
+              value={formData.mensaje}
+              onChange={handleChange}
+            />
+
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Enviando...' : 'Solicitar cotización'}
+            </button>
           </form>
 
-          {result && <p className="result-box">{result}</p>}
+          {resultado && <p className="result-box">{resultado}</p>}
         </div>
       </div>
     </section>
   );
 }
 
-export default TrackingForm;
+export default QuoteForm;
