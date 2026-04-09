@@ -1,73 +1,49 @@
 import { useState } from 'react';
 
-type TrackingStatus = 'idle' | 'in-transit' | 'delivered' | 'out-for-delivery' | 'not-found' | 'invalid';
-
-interface TrackingResult {
-  code: string;
+interface TrackingResponse {
+  found: boolean;
+  code?: string;
+  status?: string;
   message: string;
-  status: TrackingStatus;
   location?: string;
   updatedAt?: string;
 }
 
 function TrackingForm() {
   const [trackingCode, setTrackingCode] = useState('');
-  const [result, setResult] = useState<TrackingResult | null>(null);
+  const [result, setResult] = useState<TrackingResponse | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function handleTrack(e: React.FormEvent) {
+  async function handleTrack(e: React.FormEvent) {
     e.preventDefault();
 
     if (!trackingCode.trim()) {
       setResult({
-        code: '',
-        message: 'Ingresa un número de guía válido.',
-        status: 'invalid',
+        found: false,
+        message: 'Ingresa un número de guía válido.'
       });
       return;
     }
 
     const code = trackingCode.trim().toUpperCase();
 
-    if (code === 'RX1001') {
-      setResult({
-        code,
-        message: 'Tu paquete se encuentra en tránsito.',
-        status: 'in-transit',
-        location: 'Centro Logístico Guadalajara',
-        updatedAt: 'Hoy, 11:40 AM',
-      });
-    } else if (code === 'RX1002') {
-      setResult({
-        code,
-        message: 'Tu paquete ya fue entregado correctamente.',
-        status: 'delivered',
-        location: 'Zapopan, Jalisco',
-        updatedAt: 'Hoy, 09:15 AM',
-      });
-    } else if (code === 'RX1003') {
-      setResult({
-        code,
-        message: 'Tu paquete está en reparto.',
-        status: 'out-for-delivery',
-        location: 'Ruta local de entrega',
-        updatedAt: 'Hoy, 08:10 AM',
-      });
-    } else {
-      setResult({
-        code,
-        message: 'No se encontró información para esa guía.',
-        status: 'not-found',
-      });
-    }
-  }
+    try {
+      setLoading(true);
+      setResult(null);
 
-  function getStatusLabel(status: TrackingStatus) {
-    if (status === 'in-transit') return 'En tránsito';
-    if (status === 'delivered') return 'Entregado';
-    if (status === 'out-for-delivery') return 'En reparto';
-    if (status === 'not-found') return 'No encontrado';
-    if (status === 'invalid') return 'Entrada inválida';
-    return 'Sin consulta';
+      const response = await fetch(`http://localhost:3000/api/rastreo/${code}`);
+      const data = await response.json();
+
+      setResult(data);
+    } catch (error) {
+      console.error(error);
+      setResult({
+        found: false,
+        message: 'No se pudo consultar la guía. Verifica que el backend esté encendido.'
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -89,24 +65,18 @@ function TrackingForm() {
               value={trackingCode}
               onChange={(e) => setTrackingCode(e.target.value)}
             />
-            <button type="submit" className="btn btn-primary">Rastrear</button>
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Consultando...' : 'Rastrear'}
+            </button>
           </form>
 
           {result && (
-            <div className={`tracking-result tracking-${result.status}`}>
-              <div className="tracking-result-top">
-                <span className="tracking-badge">{getStatusLabel(result.status)}</span>
-                {result.code && <strong>Guía: {result.code}</strong>}
-              </div>
-
+            <div className="result-box">
+              {result.code && <p><strong>Guía:</strong> {result.code}</p>}
+              {result.status && <p><strong>Estatus:</strong> {result.status}</p>}
               <p>{result.message}</p>
-
-              {(result.location || result.updatedAt) && (
-                <div className="tracking-meta">
-                  {result.location && <span>Ubicación: {result.location}</span>}
-                  {result.updatedAt && <span>Última actualización: {result.updatedAt}</span>}
-                </div>
-              )}
+              {result.location && <p><strong>Ruta:</strong> {result.location}</p>}
+              {result.updatedAt && <p><strong>Fecha:</strong> {result.updatedAt}</p>}
             </div>
           )}
         </div>
