@@ -313,10 +313,10 @@ body {
 .quote-button {
   grid-column: span 2;
 }
-
 .feature-form input,
 .quote-grid input,
-.quote-grid select {
+.quote-grid select,
+.quote-grid textarea {
   width: 100%;
   padding: 14px 16px;
   border-radius: 16px;
@@ -326,6 +326,43 @@ body {
   outline: none;
   font-size: 0.95rem;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  box-sizing: border-box;
+}
+
+.feature-form input:focus,
+.quote-grid input:focus,
+.quote-grid select:focus,
+.quote-grid textarea:focus {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.feature-form input::placeholder,
+.quote-grid input::placeholder,
+.quote-grid textarea::placeholder {
+  color: #94a3b8;
+}
+
+.quote-grid select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  padding-right: 48px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #64748b 50%),
+    linear-gradient(135deg, #64748b 50%, transparent 50%);
+  background-position:
+    calc(100% - 22px) calc(50% - 3px),
+    calc(100% - 16px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.quote-grid textarea {
+  resize: none;
+  min-height: 48px;
+  font-family: inherit;
 }
 
 .feature-form input:focus,
