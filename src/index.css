@@ -313,6 +313,7 @@ body {
 .quote-button {
   grid-column: span 2;
 }
+
 .feature-form input,
 .quote-grid input,
 .quote-grid select,
@@ -335,6 +336,7 @@ body {
 .quote-grid textarea:focus {
   border-color: rgba(37, 99, 235, 0.45);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  background: #ffffff;
 }
 
 .feature-form input::placeholder,
@@ -361,20 +363,9 @@ body {
 
 .quote-grid textarea {
   resize: none;
-  min-height: 48px;
+  min-height: 52px;
   font-family: inherit;
-}
-
-.feature-form input:focus,
-.quote-grid input:focus,
-.quote-grid select:focus {
-  border-color: rgba(37, 99, 235, 0.45);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-}
-
-.feature-form input::placeholder,
-.quote-grid input::placeholder {
-  color: #94a3b8;
+  line-height: 1.4;
 }
 
 .result-box {
