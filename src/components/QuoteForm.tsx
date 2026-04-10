@@ -79,7 +79,7 @@ function QuoteForm() {
         </div>
 
         <div className="feature-box">
-          <form className="feature-form" onSubmit={handleSubmit}>
+          <form className="quote-grid" onSubmit={handleSubmit}>
             <input
               type="text"
               name="nombre"
@@ -152,7 +152,11 @@ function QuoteForm() {
               onChange={handleChange}
             />
 
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button
+              type="submit"
+              className="btn btn-primary quote-button"
+              disabled={loading}
+            >
               {loading ? 'Enviando...' : 'Solicitar cotización'}
             </button>
           </form>
